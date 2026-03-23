@@ -128,3 +128,59 @@ jobs:
 
       - name: PHPStan ausführen
         run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+  phpcs:
+    name: PHPCS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: PHP 8.2 einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Composer-Cache
+        uses: actions/cache@v5
+        with:
+          path: vendor
+          key: composer-8.2-${{ hashFiles('composer.json') }}
+          restore-keys: composer-8.2-
+
+      - name: Abhängigkeiten installieren
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHPCS ausführen
+        run: ./vendor/bin/phpcs
+
+  infection:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: PHP 8.2 mit Xdebug einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Composer-Cache
+        uses: actions/cache@v5
+        with:
+          path: vendor
+          key: composer-8.2-${{ hashFiles('composer.json') }}
+          restore-keys: composer-8.2-
+
+      - name: Abhängigkeiten installieren
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Infection ausführen
+        run: ./vendor/bin/infection --no-progress --min-msi=70 --min-covered-msi=80

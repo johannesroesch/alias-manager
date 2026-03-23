@@ -84,7 +84,12 @@ class Alias_Manager_Admin {
         }
 
         $aliases = Alias_Manager_DB::all();
-        $pages   = get_pages( array( 'post_status' => 'publish', 'sort_column' => 'menu_order,post_title' ) );
+        $pages   = get_pages(
+            array(
+				'post_status' => 'publish',
+				'sort_column' => 'menu_order,post_title',
+            )
+        );
         $home    = home_url( '/' );
 
         $form_alias      = $editing ? $editing->alias : '';
@@ -171,11 +176,40 @@ class Alias_Manager_Admin {
                                 </td>
                                 <td><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $row->created_at ) ) ); ?></td>
                                 <td>
-                                    <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'alias-manager', 'action' => 'edit', 'id' => $row->id ), admin_url( 'options-general.php' ) ) ); ?>">
+                                    <a href="
+                                    <?php
+                                    echo esc_url(
+                                        add_query_arg(
+                                            array(
+												'page'   => 'alias-manager',
+												'action' => 'edit',
+												'id'     => $row->id,
+                                            ),
+                                            admin_url( 'options-general.php' )
+                                        )
+                                    );
+									?>
+                                                ">
                                         <?php esc_html_e( 'Edit', 'alias-manager' ); ?>
                                     </a>
                                     &nbsp;|&nbsp;
-                                    <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'alias-manager', 'action' => 'delete', 'id' => $row->id ), admin_url( 'options-general.php' ) ), 'alias_manager_delete_' . $row->id ) ); ?>"
+                                    <a href="
+                                    <?php
+                                    echo esc_url(
+                                        wp_nonce_url(
+                                            add_query_arg(
+                                                array(
+													'page' => 'alias-manager',
+													'action' => 'delete',
+													'id'   => $row->id,
+                                                ),
+                                                admin_url( 'options-general.php' )
+                                            ),
+                                            'alias_manager_delete_' . $row->id
+                                        )
+                                    );
+									?>
+                                                "
                                         onclick="return confirm('<?php esc_attr_e( 'Really delete this alias?', 'alias-manager' ); ?>');"
                                         style="color:#b32d2e;">
                                         <?php esc_html_e( 'Delete', 'alias-manager' ); ?>

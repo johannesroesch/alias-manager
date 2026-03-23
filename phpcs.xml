@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<ruleset name="Alias Manager">
+    <description>WordPress Coding Standards for Alias Manager — security-focused</description>
+
+    <file>alias-manager.php</file>
+    <file>includes/</file>
+    <file>admin/</file>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="WordPress">
+        <!-- Indentation: project uses 4 spaces consistently -->
+        <exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
+
+        <!-- Class file naming: plugin-prefixed names are valid -->
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+
+        <!-- Doc comments: file-level docblocks are present -->
+        <exclude name="Squiz.Commenting.FileComment.SpacingAfterComment"/>
+        <exclude name="Squiz.Commenting.ClassComment.Missing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+
+        <!-- Inline comment style: non-security rule -->
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+
+        <!-- Yoda conditions: style preference, no security impact -->
+        <exclude name="WordPress.PHP.YodaConditions"/>
+
+        <!-- Already handled with inline phpcs:ignore -->
+        <exclude name="WordPress.DB.DirectDatabaseQuery.DirectQuery"/>
+        <exclude name="WordPress.DB.DirectDatabaseQuery.NoCaching"/>
+    </rule>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="alias-manager"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
