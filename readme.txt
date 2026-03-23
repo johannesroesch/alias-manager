@@ -51,6 +51,10 @@ The alias takes priority and the redirect fires before WordPress loads the page.
 
 Immediately after saving — no cache clearing required.
 
+== Screenshots ==
+
+1. The Alias Manager admin page — add new aliases and manage existing ones.
+
 == Changelog ==
 
 = 1.0.0 =
