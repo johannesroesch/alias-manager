@@ -61,3 +61,68 @@ jobs:
         with:
           report_paths: test-results.xml
           check_name: PHPUnit (PHP ${{ matrix.php }})
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP 8.2 mit Xdebug einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Composer-Cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-8.2-${{ hashFiles('composer.json') }}
+          restore-keys: composer-8.2-
+
+      - name: Abhängigkeiten installieren
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Tests mit Coverage ausführen
+        run: ./vendor/bin/phpunit --no-progress --coverage-clover coverage.xml
+
+      - name: Coverage zu Codecov hochladen
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP 8.2 einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Composer-Cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-8.2-${{ hashFiles('composer.json') }}
+          restore-keys: composer-8.2-
+
+      - name: Abhängigkeiten installieren
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Sicherheits-Audit
+        run: composer audit --no-interaction
+
+      - name: PHPStan ausführen
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
