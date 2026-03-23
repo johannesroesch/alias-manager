@@ -17,6 +17,9 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
         "infection/infection": "^0.29"
     },
+    "autoload": {
+        "classmap": ["includes/", "admin/"]
+    },
     "autoload-dev": {
         "psr-4": {
             "WPAlias\\Tests\\": "tests/"
