@@ -94,6 +94,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          static-analysis-token: ${{ secrets.CODECOV_STATIC_TOKEN }}
           files: coverage.xml
           fail_ci_if_error: false
 
