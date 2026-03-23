@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/johannesroesch/alias-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/johannesroesch/alias-manager/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/johannesroesch/alias-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/johannesroesch/alias-manager)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=johannesroesch_alias-manager&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=johannesroesch_alias-manager)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=johannesroesch_alias-manager&metric=bugs)](https://sonarcloud.io/summary/new_code?id=johannesroesch_alias-manager)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=johannesroesch_alias-manager&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=johannesroesch_alias-manager)
 [![Latest Release](https://img.shields.io/github/v/release/johannesroesch/alias-manager)](https://github.com/johannesroesch/alias-manager/releases/latest)
 [![License: GPL v2](https://img.shields.io/badge/license-GPL--2.0%2B-blue)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
