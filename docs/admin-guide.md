@@ -8,7 +8,7 @@ Dieses Handbuch richtet sich an WordPress-Administratoren, die das Plugin instal
 
 | Komponente | Mindestversion |
 |---|---|
-| PHP | 8.0 |
+| PHP | 8.1 |
 | WordPress | 5.9 |
 | MySQL | 5.7 |
 | MariaDB | 10.3 |
@@ -118,7 +118,7 @@ Falls die Tabelle nach der Aktivierung nicht angelegt wurde (z. B. wegen fehlend
 
 ### PHP-Fehler nach Update
 
-Stellen Sie sicher, dass PHP 8.0+ aktiv ist. Die Funktion `str_starts_with()` (genutzt im Redirector) ist seit PHP 8.0 verfügbar.
+Stellen Sie sicher, dass PHP 8.1+ aktiv ist. Die Funktion `str_starts_with()` (genutzt im Redirector) ist seit PHP 8.0 verfügbar, PHPUnit 10 setzt jedoch PHP 8.1 voraus.
 
 ---
 

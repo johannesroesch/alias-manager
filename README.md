@@ -25,7 +25,7 @@ WP Alias erlaubt es, beliebig viele alternative Pfade (Aliase) für bestehende W
 
 ## Anforderungen
 
-- PHP 8.0 oder höher
+- PHP 8.1 oder höher
 - WordPress 5.9 oder höher
 - MySQL 5.7 / MariaDB 10.3 oder höher
 
