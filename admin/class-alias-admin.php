@@ -122,7 +122,7 @@ class Alias_Manager_Admin {
                 <form method="post">
                     <?php wp_nonce_field( 'alias_manager_save', 'alias_manager_nonce' ); ?>
                     <input type="hidden" name="edit_id" value="<?php echo (int) $data['form_edit_id']; ?>">
-                    <table class="form-table" role="presentation">
+                    <table class="form-table">
                         <tr>
                             <th scope="row"><label for="alias"><?php esc_html_e( 'Alias Path', 'alias-manager' ); ?></label></th>
                             <td>
