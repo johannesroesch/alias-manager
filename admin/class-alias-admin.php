@@ -49,10 +49,6 @@ class Alias_Manager_Admin {
         self::render_alias_table( $data['aliases'], $data['home'] );
     }
 
-    // -------------------------------------------------------------------------
-    // Request-Handling
-    // -------------------------------------------------------------------------
-
     private static function handle_request(): string {
         if (
             isset( $_GET['action'], $_GET['id'], $_GET['_wpnonce'] )
@@ -92,15 +88,11 @@ class Alias_Manager_Admin {
     }
 
     private static function get_editing_row(): ?object {
-        if ( isset( $_GET['action'], $_GET['id'] ) && 'edit' === $_GET['action'] ) {
-            return Alias_Manager_DB::get( (int) $_GET['id'] );
+        if ( isset( $_GET['action'], $_GET['id'] ) && 'edit' === $_GET['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            return Alias_Manager_DB::get( (int) $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         }
         return null;
     }
-
-    // -------------------------------------------------------------------------
-    // View-Daten
-    // -------------------------------------------------------------------------
 
     private static function prepare_view_data( ?object $editing ): array {
         return array(
@@ -118,10 +110,6 @@ class Alias_Manager_Admin {
             'form_button'     => $editing ? __( 'Update Alias', 'alias-manager' ) : __( 'Add Alias', 'alias-manager' ),
         );
     }
-
-    // -------------------------------------------------------------------------
-    // HTML-Ausgabe
-    // -------------------------------------------------------------------------
 
     private static function render_form( string $notice, ?object $editing, array $data ): void {
         ?>
