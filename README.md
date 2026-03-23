@@ -1,5 +1,11 @@
 # Alias Manager
 
+[![CI](https://github.com/johannesroesch/alias-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/johannesroesch/alias-manager/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/johannesroesch/alias-manager)](https://github.com/johannesroesch/alias-manager/releases/latest)
+[![License: GPL v2](https://img.shields.io/badge/license-GPL--2.0%2B-blue)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
+[![WordPress](https://img.shields.io/badge/WordPress-5.9%2B-21759b)](https://wordpress.org)
+
 WordPress plugin for managing URL aliases with automatic 301 redirects.
 
 ## Overview
