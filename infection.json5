@@ -7,8 +7,5 @@
         "text": "infection.log"
     },
     "minMsi": 70,
-    "minCoveredMsi": 80,
-    "phpunit": {
-        "configDir": "."
-    }
+    "minCoveredMsi": 80
 }
