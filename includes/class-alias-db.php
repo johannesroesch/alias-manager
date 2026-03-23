@@ -81,7 +81,8 @@ class Alias_Manager_DB {
 
     public static function delete( $id ) {
         global $wpdb;
-        return $wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write operation; caching not applicable.
+        return $wpdb->delete(
             self::table(),
             array( 'id' => (int) $id ),
             array( '%d' )
