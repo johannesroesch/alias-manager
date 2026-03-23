@@ -1,0 +1,23 @@
+# Composer
+/vendor/
+composer.lock
+
+# PHPUnit
+/coverage/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Build / Paket
+*.zip
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Temporäre Dateien
+run-tests.php
+test-results.txt
