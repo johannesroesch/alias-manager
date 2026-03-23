@@ -25,6 +25,8 @@ jobs:
   test:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
 
     strategy:
       fail-fast: false
