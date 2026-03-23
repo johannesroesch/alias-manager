@@ -1,96 +1,96 @@
-# Benutzerhandbuch – Alias Manager
+# User Guide – Alias Manager
 
-Dieses Handbuch richtet sich an Redakteure und alle, die Aliase im WordPress-Backend verwalten möchten. Technische Vorkenntnisse sind nicht erforderlich.
-
----
-
-## Was ist ein Alias?
-
-Ein Alias ist ein alternativer URL-Pfad, der Besucher automatisch auf eine andere Seite weiterleitet. Beispiel:
-
-- Besucher ruft `https://example.com/sommer` auf
-- Das Plugin leitet ihn sofort zu `https://example.com/shop/aktionen/sommer-2024` weiter
-- Die Weiterleitung erfolgt unsichtbar und im Hintergrund (HTTP 301)
-
-Aliase sind nützlich für:
-- Kurze, leicht merkbare URLs für Kampagnen oder Flyer
-- Weiterleitungen nach einer Umstrukturierung der Seitenarchitektur
-- Mehrere Einstiegspunkte für eine Seite (z. B. `produkte` und `leistungen` zeigen auf dieselbe Seite)
+This guide is intended for editors and anyone who wants to manage aliases in the WordPress backend. No technical knowledge is required.
 
 ---
 
-## Alias anlegen
+## What is an alias?
 
-1. Im WordPress-Admin auf **Einstellungen → Alias Manager** klicken.
-2. Im Formular **„Neuen Alias anlegen"** die Felder ausfüllen:
+An alias is an alternative URL path that automatically redirects visitors to a different page. Example:
 
-### Alias-Pfad
+- Visitor opens `https://example.com/summer`
+- The plugin immediately redirects them to `https://example.com/shop/offers/summer-2024`
+- The redirect happens silently in the background (HTTP 301)
 
-Geben Sie nur den Slug ein – also den Teil der URL nach dem Schrägstrich. Beispiel:
-
-- Gewünschte URL: `https://example.com/sommer-aktion`
-- Alias-Pfad: `sommer-aktion`
-
-Erlaubte Zeichen: Buchstaben, Zahlen, Bindestriche (`-`), Unterstriche (`_`), Schrägstriche für mehrstufige Pfade (`shop/sommer`).
-
-### Seite auswählen (optional)
-
-Wählen Sie eine veröffentlichte WordPress-Seite aus dem Dropdown. Das Ziel-URL-Feld wird automatisch ausgefüllt.
-
-### Ziel-URL
-
-Die vollständige Adresse, auf die der Alias weiterleiten soll. Muss mit `http://` oder `https://` beginnen. Sie können auch externe URLs eintragen.
-
-3. Auf **„Alias anlegen"** klicken.
-
-Bei Erfolg erscheint eine grüne Bestätigungsmeldung und der neue Alias ist sofort aktiv.
+Aliases are useful for:
+- Short, memorable URLs for campaigns or print materials
+- Redirects after restructuring your site architecture
+- Multiple entry points for a single page (e.g. `products` and `services` both pointing to the same page)
 
 ---
 
-## Alias bearbeiten
+## Adding an alias
 
-1. In der Tabelle **„Vorhandene Aliase"** auf **Bearbeiten** neben dem gewünschten Alias klicken.
-2. Das Formular öffnet sich mit den bestehenden Werten vor.
-3. Änderungen vornehmen und auf **„Alias aktualisieren"** klicken.
-4. Mit **„Abbrechen"** kehren Sie ohne Änderungen zur Liste zurück.
+1. In the WordPress admin, go to **Settings → Alias Manager**.
+2. Fill in the **"Add New Alias"** form:
 
-> **Hinweis:** Wenn Sie den Alias-Pfad ändern, funktioniert der alte Pfad nicht mehr. Informieren Sie ggf. Personen, die den alten Link kennen.
+### Alias Path
+
+Enter only the slug — the part of the URL after the slash. Example:
+
+- Desired URL: `https://example.com/summer-sale`
+- Alias path: `summer-sale`
+
+Allowed characters: letters, numbers, hyphens (`-`), underscores (`_`), slashes for multi-level paths (`shop/summer`).
+
+### Select Page (optional)
+
+Choose a published WordPress page from the dropdown. The Target URL field will be filled in automatically.
+
+### Target URL
+
+The full address the alias should redirect to. Must start with `http://` or `https://`. External URLs are also supported.
+
+3. Click **"Add Alias"**.
+
+On success, a green confirmation message appears and the new alias is immediately active.
 
 ---
 
-## Alias löschen
+## Editing an alias
 
-1. In der Tabelle auf **Löschen** (rot) neben dem gewünschten Alias klicken.
-2. Eine Sicherheitsabfrage erscheint: **„Alias wirklich löschen?"**
-3. Mit **OK** bestätigen.
+1. In the **"Existing Aliases"** table, click **Edit** next to the alias you want to change.
+2. The form opens pre-filled with the existing values.
+3. Make your changes and click **"Update Alias"**.
+4. Click **"Cancel"** to return to the list without saving changes.
 
-Nach dem Löschen leitet der frühere Alias-Pfad nicht mehr weiter. Besucher, die den Pfad aufrufen, landen auf der WordPress-404-Seite.
+> **Note:** If you change the alias path, the old path will no longer work. Make sure to inform anyone who has the old link.
 
 ---
 
-## Übersichtstabelle
+## Deleting an alias
 
-Die Tabelle unten im Bereich „Vorhandene Aliase" zeigt alle angelegten Einträge mit folgenden Spalten:
+1. In the table, click **Delete** (shown in red) next to the alias.
+2. A confirmation dialog appears: **"Really delete this alias?"**
+3. Confirm with **OK**.
 
-| Spalte | Beschreibung |
+After deletion, the former alias path no longer redirects. Visitors who access the path will land on the WordPress 404 page.
+
+---
+
+## Overview table
+
+The table in the "Existing Aliases" section shows all saved entries with the following columns:
+
+| Column | Description |
 |---|---|
-| Alias-Pfad | Der Slug inkl. vollständiger URL als Vorschau |
-| Ziel-URL | Das Weiterleitungsziel als anklickbarer Link |
-| Erstellt am | Datum der Anlage |
-| Aktionen | Bearbeiten- und Löschen-Links |
+| Alias Path | The slug including a preview of the full URL |
+| Target URL | The redirect destination as a clickable link |
+| Created | Date the alias was created |
+| Actions | Edit and Delete links |
 
 ---
 
-## Häufige Fragen
+## Frequently asked questions
 
-**Kann ein Alias auf eine externe Website zeigen?**
-Ja. Tragen Sie einfach die vollständige externe URL (z. B. `https://partner.de/angebot`) in das Ziel-URL-Feld ein.
+**Can an alias point to an external website?**
+Yes. Simply enter the full external URL (e.g. `https://partner.example.com/offer`) in the Target URL field.
 
-**Kann ich mehrere Aliase für dieselbe Seite anlegen?**
-Ja, beliebig viele. Jeder Alias muss jedoch einen eindeutigen Pfad haben.
+**Can I create multiple aliases for the same page?**
+Yes, as many as you like. Each alias must have a unique path.
 
-**Was passiert, wenn der Alias denselben Pfad hat wie eine vorhandene Seite?**
-Der Alias-Pfad hat Vorrang und die Weiterleitung wird ausgelöst, bevor WordPress die Seite lädt. Vermeiden Sie Konflikte mit vorhandenen Seiten-Slugs.
+**What happens if an alias path matches an existing page slug?**
+The alias path takes priority and the redirect fires before WordPress loads the page. Avoid conflicts with existing page slugs.
 
-**Wie schnell ist die Weiterleitung aktiv?**
-Sofort nach dem Speichern – kein Cache-Leeren oder sonstige Schritte nötig.
+**How quickly is a new alias active?**
+Immediately after saving — no cache clearing or additional steps required.

@@ -1,130 +1,138 @@
-# Entwicklerdokumentation – Alias Manager
+# Developer Guide – Alias Manager
 
-Diese Dokumentation richtet sich an PHP-Entwickler, die das Plugin verstehen, erweitern oder in eigene Projekte integrieren möchten.
+This guide is intended for PHP developers who want to understand, extend or integrate the plugin into their own projects.
 
 ---
 
-## Projektstruktur
+## Project structure
 
 ```
 alias-manager/
-├── alias-manager.php                    # Plugin-Header, Einstiegspunkt, Hook-Registrierung
-├── composer.json                   # Dev-Abhängigkeiten (PHPUnit, Brain\Monkey)
-├── phpunit.xml                     # PHPUnit-Konfiguration
+├── alias-manager.php               # Plugin header, entry point, hook registration
+├── composer.json                   # Dev dependencies (PHPUnit, Brain\Monkey)
+├── phpunit.xml                     # PHPUnit configuration
 ├── README.md
 ├── docs/
 │   ├── user-guide.md
 │   ├── admin-guide.md
-│   └── developer-guide.md          # Diese Datei
+│   └── developer-guide.md          # This file
 ├── includes/
-│   ├── class-alias-db.php          # Datenbankschicht (CRUD)
-│   └── class-alias-redirector.php  # Request-Interception und Redirect
-└── admin/
-    └── class-alias-admin.php       # Admin-UI (Menü, Formular, Tabelle)
+│   ├── class-alias-db.php          # Database layer (CRUD)
+│   └── class-alias-redirector.php  # Request interception and redirect
+├── admin/
+│   └── class-alias-admin.php       # Admin UI (menu, form, table)
+├── languages/
+│   ├── alias-manager.pot           # Translation template
+│   ├── alias-manager-de_DE.po/.mo  # German
+│   ├── alias-manager-en_US.po/.mo  # English
+│   ├── alias-manager-fr_FR.po/.mo  # French
+│   ├── alias-manager-es_ES.po/.mo  # Spanish
+│   └── alias-manager-sv_SE.po/.mo  # Swedish
 └── tests/
-    ├── bootstrap.php               # PHPUnit-Bootstrap
+    ├── bootstrap.php               # PHPUnit bootstrap
     └── Unit/
         ├── AliasDBTest.php
         ├── AliasRedirectorTest.php
-        └── AliasAdminTest.php
+        ├── AliasAdminTest.php
+        └── LanguageFilesTest.php
 ```
 
 ---
 
-## Architektur
+## Architecture
 
-### Schichtenmodell
+### Layer model
 
 ```
 ┌─────────────────────────────────────────────┐
-│              alias-manager.php                   │  Einstiegspunkt
-│  register_activation_hook / add_action      │  Hook-Verdrahtung
+│            alias-manager.php                │  Entry point
+│  register_activation_hook / add_action      │  Hook wiring
 └──────────┬───────────────────┬──────────────┘
            │                   │
   ┌────────▼──────┐   ┌────────▼────────┐
-  │  Redirector   │   │   Admin-UI      │
+  │  Redirector   │   │   Admin UI      │
   │  (init hook)  │   │ (admin_menu)    │
   └────────┬──────┘   └────────┬────────┘
            │                   │
            └─────────┬─────────┘
-                ┌────▼─────┐
-                │  DB-Layer │
-                │ WP_Alias_DB│
-                └─────┬─────┘
+                ┌────▼──────┐
+                │  DB Layer  │
+                │Alias_Mgr_DB│
+                └─────┬──────┘
                       │
                ┌──────▼──────┐
                │  $wpdb / DB  │
                └─────────────┘
 ```
 
-### Klassen
+### Classes
 
-#### `WP_Alias_DB` (`includes/class-alias-db.php`)
+#### `Alias_Manager_DB` (`includes/class-alias-db.php`)
 
-Statische Utility-Klasse. Kapselt alle Datenbankoperationen. Kein Zustand – alle Methoden sind `static`.
+Static utility class. Encapsulates all database operations. No state — all methods are `static`.
 
-| Methode | Beschreibung |
+| Method | Description |
 |---|---|
-| `table()` | Gibt den vollständigen Tabellennamen mit WordPress-Präfix zurück |
-| `create_table()` | Erstellt die Tabelle via `dbDelta` (idempotent) |
-| `all()` | Gibt alle Aliase sortiert nach `alias ASC` zurück |
-| `get(int $id)` | Gibt einen einzelnen Alias-Datensatz zurück |
-| `find_by_alias(string $alias)` | Gibt `target_url` für einen Alias-Pfad zurück oder `null` |
-| `insert(string $alias, string $target_url)` | Legt neuen Datensatz an |
-| `update(int $id, string $alias, string $target_url)` | Aktualisiert bestehenden Datensatz |
-| `delete(int $id)` | Löscht einen Datensatz |
+| `table()` | Returns the full table name with the WordPress prefix |
+| `create_table()` | Creates the table via `dbDelta` (idempotent) |
+| `all()` | Returns all aliases sorted by `alias ASC` |
+| `get(int $id)` | Returns a single alias record |
+| `find_by_alias(string $alias)` | Returns `target_url` for an alias path or `null` |
+| `insert(string $alias, string $target_url)` | Creates a new record |
+| `update(int $id, string $alias, string $target_url)` | Updates an existing record |
+| `delete(int $id)` | Deletes a record |
 
-#### `WP_Alias_Redirector` (`includes/class-alias-redirector.php`)
+#### `Alias_Manager_Redirector` (`includes/class-alias-redirector.php`)
 
-Läuft auf dem `init`-Hook. Prüft, ob der aktuelle Request-Pfad einem Alias entspricht, und führt ggf. einen 301-Redirect aus.
+Runs on the `init` hook. Checks whether the current request path matches an alias and performs a 301 redirect if so.
 
-**Ablauf in `maybe_redirect()`:**
+**Flow in `maybe_redirect()`:**
 
-1. Frühe Rückgabe bei Admin, Ajax und Cron-Requests
-2. Request-Pfad aus `$_SERVER['REQUEST_URI']` extrahieren
-3. WordPress-Basis-Pfad (Unterverzeichnis-Installationen) abschneiden
-4. Leerer Pfad → kein Redirect
-5. `WP_Alias_DB::find_by_alias()` aufrufen
-6. Bei Treffer: `wp_redirect($target, 301)` + `exit`
+1. Early return for admin, Ajax and cron requests
+2. Extract request path from `$_SERVER['REQUEST_URI']`
+3. Strip WordPress base path (subdirectory installations)
+4. Empty path → no redirect
+5. Call `Alias_Manager_DB::find_by_alias()`
+6. On match: `wp_redirect($target, 301)` + `exit`
 
-#### `WP_Alias_Admin` (`admin/class-alias-admin.php`)
+#### `Alias_Manager_Admin` (`admin/class-alias-admin.php`)
 
-Registriert eine Unterseite unter **Einstellungen** und stellt die komplette CRUD-UI zur Verfügung.
+Registers a subpage under **Settings** and provides the full CRUD UI.
 
-| Methode | Hook | Beschreibung |
+| Method | Hook | Description |
 |---|---|---|
-| `init()` | `plugins_loaded` | Registriert `admin_menu`-Hook |
-| `register_menu()` | `admin_menu` | Fügt Menüpunkt unter Einstellungen hinzu |
-| `render_page()` | Callback | Rendert die komplette Admin-Seite |
+| `init()` | `plugins_loaded` | Registers the `admin_menu` hook |
+| `register_menu()` | `admin_menu` | Adds the menu item under Settings |
+| `render_page()` | Callback | Renders the complete admin page |
 
 ---
 
-## Datenbankschema
+## Database schema
 
 ```sql
 CREATE TABLE {prefix}_aliases (
     id         mediumint(9)  NOT NULL AUTO_INCREMENT,
-    alias      varchar(255)  NOT NULL,        -- Alias-Pfad (Slug), z. B. "sommer-aktion"
-    target_url varchar(2000) NOT NULL,        -- Vollständige Ziel-URL
+    alias      varchar(255)  NOT NULL,        -- Alias path (slug), e.g. "summer-sale"
+    target_url varchar(2000) NOT NULL,        -- Full target URL
     created_at datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY  (id),
-    UNIQUE KEY alias (alias)                  -- Unique-Constraint verhindert Duplikate
+    UNIQUE KEY alias (alias)                  -- Unique constraint prevents duplicates
 );
 ```
 
 ---
 
-## Hooks & Filter
+## Hooks & Filters
 
-Das Plugin stellt folgende WordPress-Hooks zur Verfügung, über die das Verhalten angepasst werden kann.
+The plugin provides the following WordPress hooks to customise its behaviour.
 
 ### Filter: `alias_manager_redirect_status`
 
-Ändert den HTTP-Statuscode der Weiterleitung (Standard: 301).
+Changes the HTTP status code of the redirect (default: 301).
 
 ```php
 add_filter( 'alias_manager_redirect_status', function ( int $status, string $alias, string $target ): int {
-    // Temporäre Weiterleitung für bestimmte Aliase
+    // Temporary redirect for certain aliases
     if ( str_starts_with( $alias, 'temp-' ) ) {
         return 302;
     }
@@ -132,39 +140,39 @@ add_filter( 'alias_manager_redirect_status', function ( int $status, string $ali
 }, 10, 3 );
 ```
 
-> **Hinweis:** Dieser Filter muss im Plugin selbst ergänzt werden (siehe [Erweiterungen](#erweiterungen)).
+> **Note:** This filter must be added inside the plugin itself (see [Extensions](#extensions)).
 
 ### Filter: `alias_manager_target_url`
 
-Ermöglicht die Manipulation der Ziel-URL vor dem Redirect.
+Allows manipulation of the target URL before the redirect.
 
 ```php
 add_filter( 'alias_manager_target_url', function ( string $target_url, string $alias ): string {
-    // UTM-Parameter anhängen
+    // Append UTM parameters
     return add_query_arg( 'utm_source', 'alias', $target_url );
 }, 10, 2 );
 ```
 
 ### Action: `alias_manager_before_redirect`
 
-Wird aufgerufen, kurz bevor der Redirect ausgeführt wird.
+Fired just before the redirect is executed.
 
 ```php
 add_action( 'alias_manager_before_redirect', function ( string $alias, string $target_url ): void {
-    // Redirect in eigenem Log erfassen
+    // Log the redirect
     error_log( "Alias Manager: {$alias} → {$target_url}" );
 }, 10, 2 );
 ```
 
-> **Hinweis:** Die obigen Filter und Actions sind Beispiele für eine mögliche Erweiterung. Sie müssen in der `WP_Alias_Redirector`-Klasse eingebaut werden (s. u.).
+> **Note:** The filters and actions above are examples of possible extensions. They must be implemented inside the `Alias_Manager_Redirector` class (see below).
 
 ---
 
-## Erweiterungen
+## Extensions
 
-### Filter in den Redirector einbauen
+### Adding filters to the Redirector
 
-Um eigene Filter zu unterstützen, `maybe_redirect()` in `class-alias-redirector.php` wie folgt anpassen:
+To support custom filters, update `maybe_redirect()` in `class-alias-redirector.php` as follows:
 
 ```php
 if ( $target ) {
@@ -176,64 +184,64 @@ if ( $target ) {
 }
 ```
 
-### Eigene Admin-Spalten hinzufügen
+### Adding custom admin columns
 
-Die Tabelle in `render_page()` kann durch Erweiterung der `WP_List_Table`-Klasse auf das WordPress-Standard-UI umgestellt werden. Das bietet u. a. sortierbare Spalten, Pagination und Bulk-Aktionen.
+The table in `render_page()` can be migrated to the `WP_List_Table` class for a standard WordPress UI with sortable columns, pagination and bulk actions.
 
-### Multisite-Support
+### Multisite support
 
-Für Multisite-Netzwerke muss `create_table()` für jede Sub-Site separat ausgeführt werden:
+For Multisite networks, `create_table()` must be run for each sub-site separately:
 
 ```php
-// In alias-manager.php statt register_activation_hook:
+// In alias-manager.php instead of register_activation_hook:
 add_action( 'wpmu_new_blog', function ( int $blog_id ): void {
     switch_to_blog( $blog_id );
-    WP_Alias_DB::create_table();
+    Alias_Manager_DB::create_table();
     restore_current_blog();
 } );
 ```
 
 ---
 
-## Tests ausführen
+## Running tests
 
-### Voraussetzungen
+### Prerequisites
 
 ```bash
 composer install
 ```
 
-### Unit-Tests starten
+### Run unit tests
 
 ```bash
 composer test
-# oder direkt:
+# or directly:
 ./vendor/bin/phpunit
 ```
 
-### Einzelnen Test ausführen
+### Run a single test
 
 ```bash
 ./vendor/bin/phpunit tests/Unit/AliasDBTest.php
 ./vendor/bin/phpunit --filter test_redirect_called_with_correct_url_and_status
 ```
 
-### Test-Coverage (HTML-Report)
+### Test coverage (HTML report)
 
 ```bash
 composer test-coverage
-# Report liegt in: coverage/index.html
+# Report is in: coverage/index.html
 ```
 
-Erfordert Xdebug oder PCOV als PHP-Extension.
+Requires Xdebug or PCOV as a PHP extension.
 
 ---
 
-## Test-Architektur
+## Test architecture
 
-Die Unit-Tests verwenden [Brain\Monkey](https://brain-wp.github.io/BrainMonkey/) zum Mocken von WordPress-Funktionen und [Mockery](http://docs.mockery.io/) für Objekt-Mocks (insbesondere `$wpdb`).
+The unit tests use [Brain\Monkey](https://brain-wp.github.io/BrainMonkey/) to mock WordPress functions and [Mockery](http://docs.mockery.io/) for object mocks (in particular `$wpdb`).
 
-**Herausforderung `exit`:** Der Redirector ruft nach `wp_redirect()` `exit` auf. In Tests wird `wp_redirect` als Stub registriert, der stattdessen eine `RuntimeException` wirft. So wird der `exit`-Aufruf nie erreicht und PHPUnit kann die Exception abfangen und prüfen.
+**The `exit` challenge:** The Redirector calls `exit` after `wp_redirect()`. In tests, `wp_redirect` is registered as a stub that throws a `RuntimeException` instead. This way the `exit` call is never reached and PHPUnit can catch and verify the exception.
 
 ```php
 Functions\expect('wp_redirect')
@@ -244,26 +252,26 @@ Functions\expect('wp_redirect')
     });
 
 $this->expectException(\RuntimeException::class);
-WP_Alias_Redirector::maybe_redirect();
+Alias_Manager_Redirector::maybe_redirect();
 ```
 
 ---
 
-## Code-Konventionen
+## Coding conventions
 
-- WordPress Coding Standards (WPCS) werden empfohlen.
-- Alle Datenbankwerte werden mit `sanitize_text_field()` / `esc_url_raw()` bereinigt.
-- Prepare-Statements via `$wpdb->prepare()` für alle parametrisierten Queries.
-- Nonces für alle schreibenden Admin-Aktionen.
-- Kein direkter Zugriff ohne `defined('ABSPATH')` Guard.
+- WordPress Coding Standards (WPCS) are recommended.
+- All database values are sanitized with `sanitize_text_field()` / `esc_url_raw()`.
+- Prepared statements via `$wpdb->prepare()` for all parameterized queries.
+- Nonces for all write admin actions.
+- No direct access without a `defined('ABSPATH')` guard.
 
 ---
 
-## Beitragen
+## Contributing
 
-1. Repository forken
-2. Feature-Branch anlegen: `git checkout -b feature/meine-funktion`
-3. Tests schreiben und alle bestehenden Tests grün halten: `composer test`
-4. Pull Request erstellen
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Write tests and keep all existing tests green: `composer test`
+4. Open a pull request
 
-Vor dem PR sicherstellen, dass keine PHPUnit-Fehler vorliegen und der Code den WordPress-Coding-Standards entspricht.
+Before submitting a PR, make sure there are no PHPUnit errors and the code follows the WordPress Coding Standards.

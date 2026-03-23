@@ -1,52 +1,52 @@
-# Administrationshandbuch – Alias Manager
+# Administration Guide – Alias Manager
 
-Dieses Handbuch richtet sich an WordPress-Administratoren, die das Plugin installieren, konfigurieren und warten.
+This guide is intended for WordPress administrators who want to install, configure and maintain the plugin.
 
 ---
 
-## Systemvoraussetzungen
+## System requirements
 
-| Komponente | Mindestversion |
+| Component | Minimum version |
 |---|---|
 | PHP | 8.1 |
 | WordPress | 5.9 |
 | MySQL | 5.7 |
 | MariaDB | 10.3 |
 
-Das Plugin hat keine externen PHP-Abhängigkeiten (kein Composer-Paket im Produktivbetrieb erforderlich).
+The plugin has no external PHP dependencies (no Composer packages required in production).
 
 ---
 
 ## Installation
 
-### Methode 1: Manuell via FTP / SFTP
+### Method 1: Manual via FTP / SFTP
 
-1. Den Ordner `alias-manager` (oder den entpackten Inhalt aus `alias-manager.zip`) in das Verzeichnis `wp-content/plugins/` auf dem Server hochladen.
-2. Im WordPress-Admin unter **Plugins → Installierte Plugins** das Plugin **Alias Manager** aktivieren.
+1. Upload the `alias-manager` folder (or the extracted contents of `alias-manager.zip`) to the `wp-content/plugins/` directory on your server.
+2. In the WordPress admin under **Plugins → Installed Plugins**, activate the **Alias Manager** plugin.
 
-### Methode 2: Upload über das WordPress-Admin-Backend
+### Method 2: Upload via WordPress admin
 
-1. Im WordPress-Admin auf **Plugins → Installieren** klicken.
-2. Den Tab **Plugin hochladen** wählen.
-3. Die Datei `alias-manager.zip` auswählen und auf **Jetzt installieren** klicken.
-4. Anschließend **Plugin aktivieren** klicken.
+1. In the WordPress admin, click **Plugins → Add New**.
+2. Select the **Upload Plugin** tab.
+3. Choose the `alias-manager.zip` file and click **Install Now**.
+4. Then click **Activate Plugin**.
 
-### Was bei der Aktivierung passiert
+### What happens on activation
 
-Beim Aktivieren legt das Plugin automatisch die Datenbanktabelle `{prefix}_aliases` an (Standard: `alias_manageres`). Bestehende Tabellen werden durch `dbDelta` nicht überschrieben.
-
----
-
-## Berechtigungen
-
-Das Plugin prüft die WordPress-Capability `manage_options` für alle Admin-Seiten. Nur Nutzer mit Administratorrolle (oder einer Rolle mit explizit zugewiesener `manage_options`-Berechtigung) können Aliase verwalten.
+When activated, the plugin automatically creates the database table `{prefix}_aliases` (default: `wp_aliases`). Existing tables are not overwritten thanks to `dbDelta`.
 
 ---
 
-## Datenbanktabelle
+## Permissions
+
+The plugin checks the WordPress capability `manage_options` for all admin pages. Only users with the Administrator role (or a role with `manage_options` explicitly assigned) can manage aliases.
+
+---
+
+## Database table
 
 ```sql
-CREATE TABLE alias_manageres (
+CREATE TABLE {prefix}_aliases (
     id         mediumint(9)  NOT NULL AUTO_INCREMENT,
     alias      varchar(255)  NOT NULL,
     target_url varchar(2000) NOT NULL,
@@ -56,74 +56,74 @@ CREATE TABLE alias_manageres (
 );
 ```
 
-- Der Spalte `alias` liegt ein `UNIQUE KEY` zugrunde – doppelte Alias-Pfade werden auf Datenbankebene verhindert.
-- `target_url` unterstützt URLs bis 2000 Zeichen (entspricht der praktischen IE-Grenze und ist für alle gängigen URLs ausreichend).
+- The `alias` column has a `UNIQUE KEY` — duplicate alias paths are prevented at the database level.
+- `target_url` supports URLs up to 2000 characters, which covers all common URL lengths.
 
 ---
 
-## Plugin deaktivieren und deinstallieren
+## Deactivating and uninstalling
 
-### Deaktivieren
+### Deactivate
 
-Das Plugin kann jederzeit deaktiviert werden (**Plugins → Alias Manager → Deaktivieren**). Die Datenbanktabelle und alle gespeicherten Aliase bleiben erhalten, Weiterleitungen sind jedoch inaktiv.
+The plugin can be deactivated at any time (**Plugins → Alias Manager → Deactivate**). The database table and all stored aliases are preserved, but redirects will be inactive.
 
-### Deinstallieren / Tabelle entfernen
+### Uninstall / Remove table
 
-Das Plugin löscht die Datenbanktabelle **nicht** automatisch (Datenschutz vor versehentlichem Datenverlust). Um die Tabelle manuell zu entfernen:
+The plugin does **not** automatically delete the database table (to prevent accidental data loss). To remove the table manually:
 
 ```sql
-DROP TABLE IF EXISTS alias_manageres;
+DROP TABLE IF EXISTS wp_aliases;
 ```
 
-Oder via phpMyAdmin / Adminer die Tabelle `alias_manageres` löschen.
+Or delete the table `wp_aliases` via phpMyAdmin / Adminer.
 
 ---
 
-## WordPress in einem Unterverzeichnis
+## WordPress in a subdirectory
 
-Ist WordPress in einem Unterverzeichnis installiert (z. B. `https://example.com/blog`), erkennt das Plugin den Basis-Pfad automatisch über `home_url()` und schneidet ihn vom Request-Pfad ab. Es sind keine zusätzlichen Konfigurationsschritte nötig.
+If WordPress is installed in a subdirectory (e.g. `https://example.com/blog`), the plugin automatically detects the base path via `home_url()` and strips it from the request path. No additional configuration is needed.
 
 ---
 
 ## Multisite
 
-Das Plugin ist **nicht** für WordPress-Multisite-Netzwerke optimiert. Bei Netzwerkaktivierung wird die Tabelle nur für die Haupt-Site angelegt. Für Multisite-Support sind Anpassungen durch einen Entwickler erforderlich (siehe [Entwicklerdokumentation](developer-guide.md)).
+The plugin is **not** optimized for WordPress Multisite networks. On network activation, the table is only created for the main site. Multisite support requires developer customization (see [Developer Guide](developer-guide.md)).
 
 ---
 
 ## Caching
 
-Da Weiterleitungen per `wp_redirect()` + `exit` vor dem Template-Rendering erfolgen, werden gecachte Seitenantworten (z. B. durch WP Super Cache, W3 Total Cache, LiteSpeed Cache) **nicht** ausgeliefert – der Alias-Check läuft immer. Seiten-Caches sind daher kompatibel mit diesem Plugin.
+Since redirects are executed via `wp_redirect()` + `exit` before template rendering, cached page responses (e.g. from WP Super Cache, W3 Total Cache, LiteSpeed Cache) are **not** served — the alias check always runs. Page caches are therefore compatible with this plugin.
 
-Wenn Sie einen Reverse-Proxy-Cache (z. B. Varnish, Cloudflare) einsetzen, beachten Sie:
-- 301-Antworten werden von Proxies standardmäßig gecacht. Änderungen an einem Alias sind erst sichtbar, wenn der Cache-Eintrag abläuft oder manuell invalidiert wird.
+If you use a reverse proxy cache (e.g. Varnish, Cloudflare), note:
+- 301 responses are cached by proxies by default. Changes to an alias will not be visible until the cache entry expires or is manually invalidated.
 
 ---
 
 ## Troubleshooting
 
-### Alias leitet nicht weiter
+### Alias is not redirecting
 
-- Prüfen Sie, ob der Alias-Pfad exakt dem aufgerufenen URL-Pfad entspricht (ohne führenden/nachgestellten Schrägstrich).
-- Stellen Sie sicher, dass das Plugin aktiviert ist.
-- Prüfen Sie, ob ein anderes Plugin oder die `.htaccess` den Request vor WordPress abfängt.
+- Check that the alias path exactly matches the requested URL path (no leading/trailing slash).
+- Make sure the plugin is activated.
+- Check whether another plugin or `.htaccess` is intercepting the request before WordPress.
 
-### Fehlermeldung „Alias-Slug bereits vergeben"
+### Error message "Alias slug already in use"
 
-Der eingegebene Pfad ist in der Datenbank bereits vorhanden. Verwenden Sie einen anderen Slug oder bearbeiten Sie den bestehenden Alias.
+The entered path already exists in the database. Use a different slug or edit the existing alias.
 
-### Datenbanktabelle fehlt
+### Database table is missing
 
-Falls die Tabelle nach der Aktivierung nicht angelegt wurde (z. B. wegen fehlender Datenbankrechte), kann die Erstellung manuell angestoßen werden, indem das Plugin deaktiviert und erneut aktiviert wird. Alternativ das SQL aus dem Abschnitt [Datenbanktabelle](#datenbanktabelle) direkt ausführen.
+If the table was not created on activation (e.g. due to insufficient database permissions), you can trigger creation by deactivating and reactivating the plugin. Alternatively, run the SQL from the [Database table](#database-table) section directly.
 
-### PHP-Fehler nach Update
+### PHP errors after update
 
-Stellen Sie sicher, dass PHP 8.1+ aktiv ist. Die Funktion `str_starts_with()` (genutzt im Redirector) ist seit PHP 8.0 verfügbar, PHPUnit 10 setzt jedoch PHP 8.1 voraus.
+Make sure PHP 8.1+ is active. The `str_starts_with()` function (used in the Redirector) is available from PHP 8.0, but PHPUnit 10 requires PHP 8.1.
 
 ---
 
-## Sicherheitshinweise
+## Security notes
 
-- Alle Formulareingaben werden mit `sanitize_text_field()` bzw. `esc_url_raw()` bereinigt.
-- Alle Admin-Aktionen (Speichern, Bearbeiten, Löschen) sind durch WordPress-Nonces (CSRF-Schutz) abgesichert.
-- Die Adminseite ist hinter der `manage_options`-Capability geschützt.
+- All form input is sanitized with `sanitize_text_field()` and `esc_url_raw()`.
+- All admin actions (save, edit, delete) are protected by WordPress nonces (CSRF protection).
+- The admin page is protected behind the `manage_options` capability.
