@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  */
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+    exit; // @codeCoverageIgnore
 }
 
 class Alias_Manager_DB {

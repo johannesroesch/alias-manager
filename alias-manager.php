@@ -29,7 +29,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+    exit; // @codeCoverageIgnore
 }
 
 define( 'ALIAS_MANAGER_VERSION', '1.0.0' );
