@@ -38,6 +38,28 @@ final class AliasAdminTest extends WpDbTestCase
     // -------------------------------------------------------------------------
 
     /**
+     * Mockt current_user_can, wp_verify_nonce, esc_url_raw und absint –
+     * wird von allen POST-Tests benötigt.
+     */
+    private function setupPostMocks(): void
+    {
+        Functions\expect('current_user_can')->once()->andReturn(true);
+        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
+        Functions\when('esc_url_raw')->returnArg();
+        Functions\when('absint')->alias('intval');
+    }
+
+    /**
+     * Führt render_page() aus und gibt die Ausgabe zurück.
+     */
+    private function render_page_output(): string
+    {
+        ob_start();
+        Alias_Manager_Admin::render_page();
+        return (string) ob_get_clean();
+    }
+
+    /**
      * Mockt alle WP-Ausgabefunktionen, die render_page() für das HTML-Rendering
      * benötigt. Ermöglicht Tests, die sich auf das Verhalten konzentrieren.
      */
@@ -117,11 +139,7 @@ final class AliasAdminTest extends WpDbTestCase
 
         Functions\expect('wp_nonce_field')->never();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertSame('', $output);
+        $this->assertSame('', $this->render_page_output());
     }
 
     // -------------------------------------------------------------------------
@@ -143,11 +161,7 @@ final class AliasAdminTest extends WpDbTestCase
 
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Alias deleted.', $output);
+        $this->assertStringContainsString('Alias deleted.', $this->render_page_output());
     }
 
     public function test_render_page_delete_with_invalid_nonce_skips_delete(): void
@@ -160,12 +174,8 @@ final class AliasAdminTest extends WpDbTestCase
         $this->wpdb->shouldReceive('delete')->never();
 
         $this->setupRenderMocks();
+        $this->render_page_output();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        ob_get_clean();
-
-        // Kein Fehler = Test bestanden
         $this->assertTrue(true);
     }
 
@@ -193,11 +203,7 @@ final class AliasAdminTest extends WpDbTestCase
 
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Edit Alias', $output);
+        $this->assertStringContainsString('Edit Alias', $this->render_page_output());
     }
 
     // -------------------------------------------------------------------------
@@ -213,10 +219,7 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '0',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
+        $this->setupPostMocks();
 
         // Slashes müssen vor dem Speichern entfernt werden: '/summer-sale/' → 'summer-sale'
         $this->wpdb
@@ -230,10 +233,7 @@ final class AliasAdminTest extends WpDbTestCase
             ->andReturn(1);
 
         $this->setupRenderMocks();
-
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        ob_get_clean();
+        $this->render_page_output();
     }
 
     public function test_render_page_save_new_alias_success(): void
@@ -245,23 +245,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '0',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
-        $this->wpdb
-            ->shouldReceive('insert')
-            ->once()
-            ->andReturn(1);
-
+        $this->setupPostMocks();
+        $this->wpdb->shouldReceive('insert')->once()->andReturn(1);
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Alias added.', $output);
+        $this->assertStringContainsString('Alias added.', $this->render_page_output());
     }
 
     public function test_render_page_save_new_alias_duplicate_shows_error(): void
@@ -273,23 +261,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '0',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
-        $this->wpdb
-            ->shouldReceive('insert')
-            ->once()
-            ->andReturn(false);
-
+        $this->setupPostMocks();
+        $this->wpdb->shouldReceive('insert')->once()->andReturn(false);
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Error: Alias slug already in use', $output);
+        $this->assertStringContainsString('Error: Alias slug already in use', $this->render_page_output());
     }
 
     public function test_render_page_save_empty_alias_shows_error(): void
@@ -301,20 +277,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '0',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
+        $this->setupPostMocks();
         $this->wpdb->shouldReceive('insert')->never();
-
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Alias and target URL must not be empty.', $output);
+        $this->assertStringContainsString('Alias and target URL must not be empty.', $this->render_page_output());
     }
 
     public function test_render_page_save_empty_target_shows_error(): void
@@ -326,20 +293,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '0',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
+        $this->setupPostMocks();
         $this->wpdb->shouldReceive('insert')->never();
-
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Alias and target URL must not be empty.', $output);
+        $this->assertStringContainsString('Alias and target URL must not be empty.', $this->render_page_output());
     }
 
     // -------------------------------------------------------------------------
@@ -355,23 +313,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '7',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
-        $this->wpdb
-            ->shouldReceive('update')
-            ->once()
-            ->andReturn(1);
-
+        $this->setupPostMocks();
+        $this->wpdb->shouldReceive('update')->once()->andReturn(1);
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Alias updated.', $output);
+        $this->assertStringContainsString('Alias updated.', $this->render_page_output());
     }
 
     public function test_render_page_save_update_failure_shows_error(): void
@@ -383,23 +329,11 @@ final class AliasAdminTest extends WpDbTestCase
             'edit_id'             => '7',
         ];
 
-        Functions\expect('current_user_can')->once()->andReturn(true);
-        Functions\expect('wp_verify_nonce')->once()->andReturn(true);
-        Functions\when('esc_url_raw')->returnArg();
-        Functions\when('absint')->alias('intval');
-
-        $this->wpdb
-            ->shouldReceive('update')
-            ->once()
-            ->andReturn(false);
-
+        $this->setupPostMocks();
+        $this->wpdb->shouldReceive('update')->once()->andReturn(false);
         $this->setupRenderMocks();
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Update failed.', $output);
+        $this->assertStringContainsString('Update failed.', $this->render_page_output());
     }
 
     // -------------------------------------------------------------------------
@@ -415,9 +349,7 @@ final class AliasAdminTest extends WpDbTestCase
         Functions\expect('current_user_can')->once()->andReturn(true);
         $this->setupRenderMocks([], [$page], 'https://example.com/sample-page');
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
+        $output = $this->render_page_output();
 
         $this->assertStringContainsString('Sample Page', $output);
         $this->assertStringContainsString('https://example.com/sample-page', $output);
@@ -428,27 +360,21 @@ final class AliasAdminTest extends WpDbTestCase
         Functions\expect('current_user_can')->once()->andReturn(true);
         $this->setupRenderMocks([]);
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('No aliases have been added yet.', $output);
+        $this->assertStringContainsString('No aliases have been added yet.', $this->render_page_output());
     }
 
     public function test_render_page_shows_alias_table_when_aliases_exist(): void
     {
-        $row            = new \stdClass();
-        $row->id        = 1;
-        $row->alias     = 'summer-sale';
+        $row             = new \stdClass();
+        $row->id         = 1;
+        $row->alias      = 'summer-sale';
         $row->target_url = 'https://example.com/shop/summer';
         $row->created_at = '2025-01-01 00:00:00';
 
         Functions\expect('current_user_can')->once()->andReturn(true);
         $this->setupRenderMocks([$row]);
 
-        ob_start();
-        Alias_Manager_Admin::render_page();
-        $output = ob_get_clean();
+        $output = $this->render_page_output();
 
         $this->assertStringContainsString('summer-sale', $output);
         $this->assertStringContainsString('https://example.com/shop/summer', $output);
