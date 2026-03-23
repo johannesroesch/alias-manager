@@ -13,9 +13,9 @@ use WP_Alias_Redirector;
  * Tests für WP_Alias_Redirector.
  *
  * Alle WordPress-Funktionen (is_admin, wp_doing_ajax, wp_doing_cron,
- * home_url, wp_redirect) werden per Brain\Monkey gemockt.
- * Der `exit`-Aufruf nach dem Redirect wird in einem separaten Prozess
- * ausgeführt, damit der eigentliche PHPUnit-Prozess weiterläuft.
+ * wp_unslash, wp_parse_url, home_url, wp_redirect) werden per Brain\Monkey gemockt.
+ * Der `exit`-Aufruf nach dem Redirect wird durch eine Exception im wp_redirect-Mock
+ * abgefangen, damit der eigentliche PHPUnit-Prozess weiterläuft.
  */
 final class AliasRedirectorTest extends TestCase
 {
@@ -34,6 +34,11 @@ final class AliasRedirectorTest extends TestCase
         $GLOBALS['wpdb']    = $this->wpdb;
 
         $_SERVER['REQUEST_URI'] = '/';
+
+        // wp_unslash gibt den Wert unverändert zurück (kein Slashing nötig im Test)
+        Functions\when('wp_unslash')->returnArg();
+        // wp_parse_url delegiert an natives parse_url
+        Functions\when('wp_parse_url')->alias('parse_url');
     }
 
     protected function tearDown(): void
@@ -105,16 +110,15 @@ final class AliasRedirectorTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Alias-Auflösung ohne Redirect-Aufruf (Whitebox)
+    // Alias-Auflösung
     // -------------------------------------------------------------------------
 
     /**
      * Prüft, dass beim Fund eines Alias wp_redirect mit korrekter URL
      * und 301-Status aufgerufen wird.
      *
-     * Da wp_redirect() + exit im selben Stack liegen, wird wp_redirect
-     * per Brain\Monkey als Stub gesetzt und wirft eine Exception, die
-     * den exit-Aufruf verhindert und die Assertion ermöglicht.
+     * wp_redirect wird per Brain\Monkey als Stub gesetzt und wirft eine Exception,
+     * die den exit-Aufruf verhindert und die Assertion ermöglicht.
      */
     public function test_redirect_called_with_correct_url_and_status(): void
     {

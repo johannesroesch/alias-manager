@@ -14,7 +14,7 @@ class WP_Alias_DB {
 
     public static function create_table() {
         global $wpdb;
-        $table          = self::table();
+        $table           = self::table();
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE {$table} (
@@ -32,30 +32,28 @@ class WP_Alias_DB {
 
     public static function all() {
         global $wpdb;
-        return $wpdb->get_results(
-            'SELECT * FROM ' . self::table() . ' ORDER BY alias ASC'
-        );
+        $table = self::table();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom table; table name is generated internally and safe.
+        return $wpdb->get_results( "SELECT * FROM `{$table}` ORDER BY alias ASC" );
     }
 
     public static function get( $id ) {
         global $wpdb;
-        return $wpdb->get_row( $wpdb->prepare(
-            'SELECT * FROM ' . self::table() . ' WHERE id = %d',
-            $id
-        ) );
+        $table = self::table();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom table; table name is generated internally and safe.
+        return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `{$table}` WHERE id = %d", $id ) );
     }
 
     public static function find_by_alias( $alias ) {
         global $wpdb;
-        return $wpdb->get_var( $wpdb->prepare(
-            'SELECT target_url FROM ' . self::table() . ' WHERE alias = %s',
-            $alias
-        ) );
+        $table = self::table();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom table; table name is generated internally and safe.
+        return $wpdb->get_var( $wpdb->prepare( "SELECT target_url FROM `{$table}` WHERE alias = %s", $alias ) );
     }
 
     public static function insert( $alias, $target_url ) {
         global $wpdb;
-        return $wpdb->insert(
+        return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
             self::table(),
             array(
                 'alias'      => sanitize_text_field( $alias ),
@@ -67,7 +65,7 @@ class WP_Alias_DB {
 
     public static function update( $id, $alias, $target_url ) {
         global $wpdb;
-        return $wpdb->update(
+        return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
             self::table(),
             array(
                 'alias'      => sanitize_text_field( $alias ),
@@ -81,7 +79,7 @@ class WP_Alias_DB {
 
     public static function delete( $id ) {
         global $wpdb;
-        return $wpdb->delete(
+        return $wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
             self::table(),
             array( 'id' => (int) $id ),
             array( '%d' )

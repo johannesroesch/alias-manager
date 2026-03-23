@@ -19,7 +19,8 @@ jobs:
         uses: wordpress/plugin-check-action@v1
         with:
           build-dir: './'
-          exclude-directories: 'vendor,tests'
+          exclude-directories: 'vendor,tests,.github'
+          exclude-files: '.wp-env.json,.gitignore'
 
   test:
     name: PHP ${{ matrix.php }}

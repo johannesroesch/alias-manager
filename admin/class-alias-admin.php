@@ -30,8 +30,8 @@ class WP_Alias_Admin {
         // Alias löschen
         if (
             isset( $_GET['action'], $_GET['id'], $_GET['_wpnonce'] )
-            && $_GET['action'] === 'delete'
-            && wp_verify_nonce( $_GET['_wpnonce'], 'wp_alias_delete_' . (int) $_GET['id'] )
+            && 'delete' === $_GET['action']
+            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_alias_delete_' . (int) $_GET['id'] )
         ) {
             WP_Alias_DB::delete( (int) $_GET['id'] );
             $notice = '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Alias gelöscht.', 'wp-alias' ) . '</p></div>';
@@ -43,9 +43,9 @@ class WP_Alias_Admin {
         }
 
         // Formular speichern (Neu oder Aktualisieren)
-        if ( isset( $_POST['wp_alias_nonce'] ) && wp_verify_nonce( $_POST['wp_alias_nonce'], 'wp_alias_save' ) ) {
-            $alias      = trim( sanitize_text_field( $_POST['alias'] ?? '' ), '/' );
-            $target_url = esc_url_raw( trim( $_POST['target_url'] ?? '' ) );
+        if ( isset( $_POST['wp_alias_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp_alias_nonce'] ) ), 'wp_alias_save' ) ) {
+            $alias      = trim( sanitize_text_field( wp_unslash( $_POST['alias'] ?? '' ) ), '/' );
+            $target_url = esc_url_raw( trim( wp_unslash( $_POST['target_url'] ?? '' ) ) );
             $edit_id    = (int) ( $_POST['edit_id'] ?? 0 );
 
             if ( $alias === '' || $target_url === '' ) {
@@ -70,8 +70,8 @@ class WP_Alias_Admin {
         $pages   = get_pages( array( 'post_status' => 'publish', 'sort_column' => 'menu_order,post_title' ) );
         $home    = home_url( '/' );
 
-        $form_alias      = $editing ? esc_attr( $editing->alias ) : '';
-        $form_target_url = $editing ? esc_attr( $editing->target_url ) : '';
+        $form_alias      = $editing ? $editing->alias : '';
+        $form_target_url = $editing ? $editing->target_url : '';
         $form_edit_id    = $editing ? (int) $editing->id : 0;
         $form_button     = $editing ? __( 'Alias aktualisieren', 'wp-alias' ) : __( 'Alias anlegen', 'wp-alias' );
         ?>
@@ -83,13 +83,13 @@ class WP_Alias_Admin {
                 <h2 style="margin-top:0;"><?php echo $editing ? esc_html__( 'Alias bearbeiten', 'wp-alias' ) : esc_html__( 'Neuen Alias anlegen', 'wp-alias' ); ?></h2>
                 <form method="post">
                     <?php wp_nonce_field( 'wp_alias_save', 'wp_alias_nonce' ); ?>
-                    <input type="hidden" name="edit_id" value="<?php echo $form_edit_id; ?>">
+                    <input type="hidden" name="edit_id" value="<?php echo (int) $form_edit_id; ?>">
                     <table class="form-table" role="presentation">
                         <tr>
                             <th scope="row"><label for="alias"><?php esc_html_e( 'Alias-Pfad', 'wp-alias' ); ?></label></th>
                             <td>
                                 <span><?php echo esc_html( $home ); ?></span>
-                                <input type="text" id="alias" name="alias" value="<?php echo $form_alias; ?>"
+                                <input type="text" id="alias" name="alias" value="<?php echo esc_attr( $form_alias ); ?>"
                                     placeholder="aliasA" class="regular-text" required>
                                 <p class="description"><?php esc_html_e( 'Nur den Slug eingeben, z. B. "aliasA" für example.com/aliasA', 'wp-alias' ); ?></p>
                             </td>
@@ -111,7 +111,7 @@ class WP_Alias_Admin {
                         <tr>
                             <th scope="row"><label for="target_url"><?php esc_html_e( 'Ziel-URL', 'wp-alias' ); ?></label></th>
                             <td>
-                                <input type="url" id="target_url" name="target_url" value="<?php echo $form_target_url; ?>"
+                                <input type="url" id="target_url" name="target_url" value="<?php echo esc_attr( $form_target_url ); ?>"
                                     placeholder="https://example.com/pageA" class="large-text" required>
                                 <p class="description"><?php esc_html_e( 'Vollständige URL des Ziels. Wird per 301-Redirect weitergeleitet.', 'wp-alias' ); ?></p>
                             </td>
