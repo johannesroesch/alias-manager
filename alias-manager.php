@@ -12,7 +12,6 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       alias-manager
  * Domain Path:       /languages
- * Update URI:        https://github.com/johannesroesch/alias-manager
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,9 +28,6 @@ require_once ALIAS_MANAGER_DIR . 'admin/class-alias-admin.php';
 register_activation_hook( __FILE__, array( 'Alias_Manager_DB', 'create_table' ) );
 
 add_action( 'init', array( 'Alias_Manager_Redirector', 'maybe_redirect' ) );
-add_action( 'init', function () {
-    load_plugin_textdomain( 'alias-manager', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-} );
 
 if ( is_admin() ) {
     add_action( 'plugins_loaded', array( 'Alias_Manager_Admin', 'init' ) );
